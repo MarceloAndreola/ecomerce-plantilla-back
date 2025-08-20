@@ -1,3 +1,1 @@
-#!/bin/bash
-gunicorn app:app --bind 0.0.0.0:$PORT
-dale
+gunicorn wsgi:app --bind 0.0.0.0:$PORT
