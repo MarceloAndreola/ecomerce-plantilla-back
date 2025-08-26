@@ -8,3 +8,5 @@ class Pagos(db.Model):
     archivo = db.Column(db.String(200), nullable=False)  # ruta del comprobante
     creado_en = db.Column(db.DateTime, default=datetime.utcnow)
     aprobado = db.Column(db.Boolean, default=False)  # para que admin lo apruebe
+
+    estado_envio = db.Column(db.String(20), default='Pago confirmado')

@@ -14,23 +14,23 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+# ================= Configuración PostgreSQL =================
+# Cambiá TU_CONTRASEÑA por la contraseña real de Render
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://marcelo_andreola:eV3LY02YBBn4qlzZdxaNy7kbux0UqokD@dpg-d2n11295pdvs739drbkg-a.oregon-postgres.render.com:5432/ecommerce_plantilla'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Carpeta absoluta para subir comprobantes
+# ================= Carpeta para subir comprobantes =================
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads', 'comprobantes')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-# Exportar la carpeta para el blueprint
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+# ================= Inicializar DB =================
 db.init_app(app)
-
 with app.app_context():
     db.create_all()
 
-# Registrar blueprints
+# ================= Registrar Blueprints =================
 app.register_blueprint(main)
 app.register_blueprint(create_users)
 app.register_blueprint(create_prod)
@@ -38,9 +38,8 @@ app.register_blueprint(admin_log)
 app.register_blueprint(bank_details)
 app.register_blueprint(pagos_bp)
 
-# Crear admin si no existe
+# ================= Crear admin si no existe =================
 with app.app_context():
-    from app.models.auth_admin import Admin
     if not Admin.query.filter_by(name_admin="admin").first():
         admin = Admin(name_admin="admin")
         admin.set_password("1234")
@@ -50,10 +49,11 @@ with app.app_context():
     else:
         print("⚠️ Admin ya existe")
 
-# Servir archivos subidos
+# ================= Servir archivos subidos =================
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
+# ================= Ejecutar app =================
 if __name__ == '__main__':
     app.run(debug=True)
