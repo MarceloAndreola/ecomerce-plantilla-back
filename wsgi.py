@@ -15,8 +15,8 @@ app = Flask(__name__)
 CORS(app)
 
 # ================= Configuración PostgreSQL =================
-# Cambiá TU_CONTRASEÑA por la contraseña real de Render
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://marcelo_andreola:eV3LY02YBBn4qlzZdxaNy7kbux0UqokD@dpg-d2n11295pdvs739drbkg-a.oregon-postgres.render.com:5432/ecommerce_plantilla'
+# Tomar la URL desde la variable de entorno DATABASE_URL
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URL")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # ================= Carpeta para subir comprobantes =================
