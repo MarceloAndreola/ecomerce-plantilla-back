@@ -129,16 +129,37 @@ def buscar_cat(name):
     
     return jsonify([
         {
-            'id' : c.id,
+            'id' : c.id,  
             'name_cat' : c.name_cat,
         }
      for c in categoria
      ]), 200
 
 
-@create_prod.route('/modificar_cat', methods=['PUT'])
-def modificar_cat():
-    pass
+@create_prod.route('/modificar_cat/<int:id>', methods=['PUT'])
+def modificar_cat(id):
+    categoria = Categoria.query.get_or_404(id)
+
+    data = request.form
+
+    categoria.name_cat = data.get('name_cat', categoria.name_cat)
+
+    db.session.commit()
+
+    return jsonify({
+        'id' : categoria.id,
+        'name_cat' : categoria.name_cat
+    }), 200
+
+@create_prod.route('/delete_cat/<int:id>', methods=['DELETE'])
+def delete_cat(id):
+    categoria = Categoria.query.get_or_404(id)
+    db.session.delete(categoria)
+    db.session.commit()
+
+    return jsonify({
+        'message' : f'Categoria {id} Nombre: {categoria.name_cat} eliminado con exito'
+    })
 
 
 
