@@ -118,7 +118,30 @@ def create_categoria():
         "name_cat": nueva_cat.name_cat
     }), 201
 
+
+@create_prod.route('/buscar_cat/<string:name>', methods=['GET'])
+def buscar_cat(name):
+    name = name.strip()
+    categoria = Categoria.query.filter(Categoria.name_cat.ilike(f"%{name}%")).all()
+
+    if not categoria:
+        return jsonify([]), 200
     
+    return jsonify([
+        {
+            'id' : c.id,
+            'name_cat' : c.name_cat,
+        }
+     for c in categoria
+     ]), 200
+
+
+@create_prod.route('/modificar_cat', methods=['PUT'])
+def modificar_cat():
+    pass
+
+
+
 @create_prod.route('/test', methods=["GET"])
 def test():
     return "ok"
