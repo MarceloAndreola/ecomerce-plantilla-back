@@ -83,18 +83,25 @@ def get_categorias():
 
 @create_prod.route('/lista_prod_por_cat/<int:categoria_id>', methods=["GET"])
 def get_prod_por_categoria(categoria_id):
-    producto = Productos.query.filter_by(categoria_id=categoria_id).all()
+    # Trae todos los productos de la categoría
+    productos = Productos.query.filter_by(categoria_id=categoria_id).all()
+
+    # Si no hay productos, devolvemos lista vacía
+    if not productos:
+        return jsonify([]), 200
+
+    # Armamos la respuesta usando la URL completa de Cloudinary
     return jsonify([
         {
-        "id": p.id, 
-        "name_prod": p.name_prod,
-        "descripcion": p.descripcion, 
-        "precio": p.precio,
-        "stock" : p.stock,
-        "image_path": p.image_path
+            "id": p.id,
+            "name_prod": p.name_prod,
+            "descripcion": p.descripcion,
+            "precio": p.precio,
+            "stock": p.stock,
+            "image_path": p.image_path  # ⚡ asumimos que aquí ya está la URL de Cloudinary
         }
-        for p in producto
-        ])
+        for p in productos
+    ]), 200
 
 @create_prod.route('/create_categoria', methods=["POST"])
 def create_categoria():
