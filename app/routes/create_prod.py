@@ -3,6 +3,7 @@ from app.models.product import Productos, Categoria
 from app.models import db
 import os
 from werkzeug.utils import secure_filename
+from cloudinary_config import cloudinary, cloudinary_uploader
 
 create_prod = Blueprint('productos', __name__, url_prefix='/productos')
 
@@ -33,17 +34,15 @@ def create_productos():
         return jsonify({'error' : 'No se seleccionio archivo'}), 400
     
     if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        upload_path = os.path.join(current_app.root_path, UPLOAD_FOLDER)
-        os.makedirs(upload_path, exist_ok=True)
-        file.save(os.path.join(upload_path, filename))
+        resultado = cloudinary.uploader.upload(file)
+        url_imagen = resultado['secure_url']
 
         new_prod = Productos(
             name_prod = name_prod,
             descripcion = descripcion,
             precio = precio,
             stock = stock,
-            image_path = filename,
+            image_path = url_imagen,
             categoria_id = int(categoria_id)
         )
 
@@ -206,11 +205,8 @@ def mod_prod(id):
 
     # Solo actualizamos la imagen si se subió una nueva
     if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        upload_path = os.path.join(current_app.root_path, UPLOAD_FOLDER)
-        os.makedirs(upload_path, exist_ok=True)
-        file.save(os.path.join(upload_path, filename))
-        producto.image_path = filename
+        resultado = cloudinary.uploader.upload(file)
+        producto.image_path = resultado['secure_url']
 
     db.session.commit()
 
