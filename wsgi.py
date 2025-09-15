@@ -50,9 +50,9 @@ with app.app_context():
         print("⚠️ Admin ya existe")
 
 # ================= Servir archivos subidos =================
-@app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+#@app.route('/uploads/<filename>')
+#def uploaded_file(filename):
+#    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 # ================= Ejecutar app =================
 if __name__ == '__main__':
