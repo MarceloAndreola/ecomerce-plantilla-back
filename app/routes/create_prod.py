@@ -14,7 +14,7 @@ def allowed_file(filename):
     return '.' in filename and \
         filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@create_prod.route('/create_prod', methods=['GET', 'POST'])
+@create_prod.route('/create_prod', methods=['POST'])
 def create_productos():
     name_prod = request.form.get('name_prod')
     descripcion = request.form.get('descripcion')
@@ -26,27 +26,29 @@ def create_productos():
         return jsonify({'error': 'Falta categoria'}), 400
 
     if 'image' not in request.files:
-        return jsonify({'error': 'No se envio imagen'}), 400
+        return jsonify({'error' : 'No se envio imagen'}), 400
 
     file = request.files['image']
 
     if file.filename == '':
-        return jsonify({'error': 'No se seleccionó archivo'}), 400
+        return jsonify({'error' : 'No se seleccionó archivo'}), 400
 
     if file and allowed_file(file.filename):
         try:
+            # Subimos a Cloudinary
             resultado = cloudinary.uploader.upload(file)
-            print("✅ Resultado upload Cloudinary:", resultado)  # DEBUG
             url_imagen = resultado.get('secure_url')
+
             if not url_imagen:
                 return jsonify({'error': 'No se pudo obtener URL de Cloudinary'}), 500
 
+            # Creamos producto con la URL de Cloudinary
             new_prod = Productos(
                 name_prod=name_prod,
                 descripcion=descripcion,
                 precio=precio,
                 stock=stock,
-                image_path=url_imagen,
+                image_path=url_imagen,  # ⚡ Guardamos URL completa
                 categoria_id=int(categoria_id)
             )
             db.session.add(new_prod)
@@ -56,8 +58,8 @@ def create_productos():
                 'id': new_prod.id,
                 'name_prod': new_prod.name_prod,
                 'descripcion': new_prod.descripcion,
-                'precio': precio,
-                'stock': stock,
+                'precio': new_prod.precio,
+                'stock': new_prod.stock,
                 'image_path': new_prod.image_path,
                 'categoria_id': new_prod.categoria_id
             }), 201
@@ -65,8 +67,8 @@ def create_productos():
         except Exception as e:
             print("❌ Error al subir a Cloudinary:", e)
             return jsonify({'error': 'Error al subir la imagen'}), 500
-    else:
-        return jsonify({'error': 'Archivo no permitido'}), 400
+
+    return jsonify({'error': 'Archivo no permitido'}), 400
 
 @create_prod.route('/lista_productos', methods=['GET'])
 def lista_user():
