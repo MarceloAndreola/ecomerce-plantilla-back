@@ -14,3 +14,5 @@ cloudinary.config(
     api_secret=os.getenv("CLOUDINARY_API_SECRET"),
     secure=True  # asegura que la URL que te devuelve sea HTTPS
 )
+
+cloudinary_uploader = cloudinary.uploader
