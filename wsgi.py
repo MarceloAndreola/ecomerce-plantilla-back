@@ -10,14 +10,27 @@ from app.routes.chekout_payments import pagos_bp
 from app.models.auth_admin import Admin
 import os
 from flask_cors import CORS
+from flask_jwt_extended import JWTManager
+from datetime import timedelta
+from config import Config
 
+
+# ================ Crear app ====================
 app = Flask(__name__)
 CORS(app)
 
-# ================= Configuración PostgreSQL =================
-# Tomar la URL desde la variable de entorno DATABASE_URL
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URL")
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# ================ Cargar configuracion ================
+app.config.from_object(Config)
+
+# ================= Configuracion JWT ===================
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
+app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
+app.config['JWT_ALGORITHM'] = 'HS256'
+app.config['JWT_TOKEN_LOCATION'] = ['headers']
+app.config['JWT_HEADER_NAME'] = 'Authorization'
+app.config['JWT_HEADER_TYPE'] = 'Bearer'
+
+jwt = JWTManager(app)
 
 # ================= Carpeta para subir comprobantes =================
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))

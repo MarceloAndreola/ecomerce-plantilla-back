@@ -4,6 +4,7 @@ from app.models import db
 import os
 from werkzeug.utils import secure_filename
 from cloudinary_config import cloudinary, cloudinary_uploader
+from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token, create_refresh_token
 
 create_prod = Blueprint('productos', __name__, url_prefix='/productos')
 
@@ -15,7 +16,11 @@ def allowed_file(filename):
         filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @create_prod.route('/create_prod', methods=['POST'])
+@jwt_required()
 def create_productos():
+    current_user = get_jwt_identity()
+    if current_user != "admin":
+        return jsonify({"msg" : "No autorizado"}), 403
     name_prod = request.form.get('name_prod')
     descripcion = request.form.get('descripcion')
     precio = request.form.get('precio')

@@ -1,6 +1,8 @@
 from flask import Blueprint, request, jsonify
 from app.models import db
 from app.models.auth_admin import Admin
+from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token, create_refresh_token
+
 
 admin_log = Blueprint('admin', __name__, url_prefix='/admin_auth')
 
@@ -12,6 +14,12 @@ def admin_login():
 
     admin = Admin.query.filter_by(name_admin=data["name_admin"]).first()
     if admin and admin.check_password(data["password"]):
-        return jsonify({"message": "Login exitoso"}), 200
+        access_token = create_access_token(identity=admin.name_admin)
+        refresh_token = create_refresh_token(identity=admin.name_admin)
+        return jsonify({
+            "message": "Login exitoso",
+            "access_token" : access_token,
+            "refresh_token" : refresh_token
+            }), 200
     else:
         return jsonify({"error": "Usuario o contraseña incorrecta"}), 401
