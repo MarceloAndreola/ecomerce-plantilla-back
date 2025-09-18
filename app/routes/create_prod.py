@@ -5,6 +5,7 @@ import os
 from werkzeug.utils import secure_filename
 from cloudinary_config import cloudinary, cloudinary_uploader
 from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token, create_refresh_token
+from wsgi import is_admin
 
 create_prod = Blueprint('productos', __name__, url_prefix='/productos')
 
@@ -18,9 +19,8 @@ def allowed_file(filename):
 @create_prod.route('/create_prod', methods=['POST'])
 @jwt_required()
 def create_productos():
-    current_user = get_jwt_identity()
-    if current_user != "admin":
-        return jsonify({"msg" : "No autorizado"}), 403
+    if not is_admin():
+        return jsonify({'msg' : 'No autorizado'}), 403
     name_prod = request.form.get('name_prod')
     descripcion = request.form.get('descripcion')
     precio = request.form.get('precio')
@@ -76,16 +76,27 @@ def create_productos():
     return jsonify({'error': 'Archivo no permitido'}), 400
 
 @create_prod.route('/lista_productos', methods=['GET'])
+@jwt_required(optional=True)
 def lista_user():
     producto = Productos.query.all()
-    return jsonify([{
+    lista = [{
         'id' : productos.id,
         'name_prod' : productos.name_prod,
         'descripcion' : productos.descripcion,
         'precio' : productos.precio,
         'stock' : productos.stock,
         'image_path' : productos.image_path
-    } for productos in producto])
+    } for productos in producto]
+    
+    identity = get_jwt_identity()
+    if identity:
+        return jsonify({
+            'productos' : lista,
+            'usuario' : identity
+        }), 200
+    
+    return jsonify({'productos' : lista}), 200
+
 
 
 @create_prod.route('/lista_categorias', methods=["GET"])

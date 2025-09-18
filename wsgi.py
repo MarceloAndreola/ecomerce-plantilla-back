@@ -1,4 +1,4 @@
-from flask import Flask, send_from_directory
+from flask import Flask, send_from_directory, jsonify
 from app.models import db
 from app.models.user import User
 from app.routes import main
@@ -10,9 +10,10 @@ from app.routes.chekout_payments import pagos_bp
 from app.models.auth_admin import Admin
 import os
 from flask_cors import CORS
-from flask_jwt_extended import JWTManager
+from flask_jwt_extended import JWTManager, get_jwt_identity, get_jwt
 from datetime import timedelta
 from config import Config
+
 
 
 # ================ Crear app ====================
@@ -31,6 +32,50 @@ app.config['JWT_HEADER_NAME'] = 'Authorization'
 app.config['JWT_HEADER_TYPE'] = 'Bearer'
 
 jwt = JWTManager(app)
+
+# Claims personalizados
+@jwt.additional_claims_loader
+def add_claims_to_access_token(identity):
+    #Aqui podras consultar a la base de datos para obtener roles
+    if identity == 'admin':
+        return {
+            'role' : 'admin',
+            'permissions' : ['read', 'write', 'delete']
+        }
+    return {
+        'role' : 'user',
+        'permissions' : ['read']
+    }
+
+def is_admin():
+    claims = get_jwt()
+    return claims.get('role') == 'admin'
+
+
+
+# Manejador para token expirados
+@jwt.expired_token_loader
+def expired_token_callback(jwt_header, jwt_payload):
+    return jsonify({
+        'error' : 'Token expirado',
+        'message' : 'El token de acceso ha caducado'
+    }), 401
+
+# Manejador para tokens invalidos
+@jwt.invalid_token_loader
+def invalid_token_callback(error):
+    return jsonify({
+        'error' : 'Token invalido',
+        'message' : 'La firma del token no es valida'
+    }), 401
+
+# Manejador para peticiones sin token
+@jwt.unauthorized_loader
+def missing_token_callback(error):
+    return jsonify({
+        'error' : 'Token requerido',
+        'message' : 'Se requiere un token de acceso valido'
+    }), 401
 
 # ================= Carpeta para subir comprobantes =================
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
