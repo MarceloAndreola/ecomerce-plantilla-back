@@ -29,3 +29,18 @@ def admin_login():
             }), 200
     else:
         return jsonify({"error": "Usuario o contraseña incorrecta"}), 401
+    
+
+@admin_log.route('/refresh', methods=['POST'])
+@jwt_required(refresh=True)
+def refresh():
+    #Obtener la identidad del token de refresh
+    current_user = get_jwt_identity()
+
+    #Crear nuevo token de accesso
+    new_access_token = create_access_token(identity=current_user)
+
+    return jsonify({
+        'access_token' : new_access_token
+    }), 200
+
