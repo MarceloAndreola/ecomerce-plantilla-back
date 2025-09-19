@@ -1,59 +1,46 @@
-from flask import Blueprint, request, jsonify, current_app
-from app.models.user import User
+# create_users.py (modificado)
+from flask import Blueprint, request, jsonify
 from app.models import db
-import os
-from werkzeug.utils import secure_filename
-
+from app.models.auth_admin import Admin  # Ahora usamos Admin
+from werkzeug.security import generate_password_hash
 
 create_users = Blueprint('users', __name__, url_prefix='/user')
 
-UPLOAD_FOLDER = 'uploads'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-
-def allowed_file(filename):
-    return '.' in filename and \
-        filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-#CREAR USUARIOS
-@create_users.route('/create-users', methods=['GET','POST'])
+# CREAR USUARIOS ADMIN
+@create_users.route('/create-users', methods=['POST'])
 def create_user():
-    name = request.form.get('name')
-    if 'image' not in request.files:
-        return jsonify({'error' : 'No se envio imagen'}), 400
+    data = request.get_json()
+    if not data or "name" not in data or "password" not in data:
+        return jsonify({'error': 'Faltan datos'}), 400
 
-    file = request.files['image']
+    # Verificar si el admin ya existe
+    existing_user = Admin.query.filter_by(name_admin=data["name"]).first()
+    if existing_user:
+        return jsonify({'error': 'El usuario ya existe'}), 400
 
-    if file.filename == '':
-        return jsonify({'error': 'No se seleccionó archivo'}), 400
+    # Crear admin con password hasheada
+    new_user = Admin(
+        name_admin=data["name"],
+    )
+    new_user.set_password(data["password"])
 
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        upload_path = os.path.join(current_app.root_path, UPLOAD_FOLDER)
-        os.makedirs(upload_path, exist_ok=True)
-        file.save(os.path.join(upload_path, filename))
+    db.session.add(new_user)
+    db.session.commit()
 
-        new_user = User(
-            name=name,
-            image_path=filename
-        )
-        db.session.add(new_user)
-        db.session.commit()
+    return jsonify({
+        'id': new_user.id,
+        'name': new_user.name_admin
+    }), 201
 
-        return jsonify({
-            'id': new_user.id,
-            'name': new_user.name,
-            'image_path': new_user.image_path
-        }), 201
-    else:
-        return jsonify({'error': 'Archivo no permitido'}), 400
-    
 
+# LISTAR USUARIOS ADMIN
 @create_users.route('/lista_usuarios', methods=['GET'])
 def lista_user():
-    usuarios = User.query.all()
+    usuarios = Admin.query.all()
     return jsonify([{
-        'id' : user.id,
-        'name' : user.name,
-        'image_path' : user.image_path
+        'id': user.id,
+        'name': user.name_admin
     } for user in usuarios])
+
+
 

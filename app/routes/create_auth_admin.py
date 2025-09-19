@@ -43,6 +43,11 @@ def admin_login():
     else:
         return jsonify({"error": "Usuario o contraseña incorrecta"}), 401
     
+
+
+
+
+    
 @admin_log.route('/logout', methods=['POST'])
 @jwt_required()
 def logout():
