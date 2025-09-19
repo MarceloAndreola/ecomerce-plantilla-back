@@ -5,11 +5,24 @@ from flask_jwt_extended import (
     jwt_required, 
     get_jwt_identity, 
     create_access_token, 
-    create_refresh_token
+    create_refresh_token,
+    get_jwt
     )
 from werkzeug.security import check_password_hash
 
 admin_log = Blueprint('admin', __name__, url_prefix='/admin_auth')
+
+# Almacen simple para tokens revocados (en produccion usar Redis o base de datos)
+blacklisted_tokens = set()
+
+@admin_log.record_once
+def setup_jwt_callbacks(state):
+    jwt = state.app.extensions["flask-jwt-extended"]
+
+    @jwt.token_in_blocklist_loader
+    def check_if_token_revoked(jwt_header, jwt_payload):
+        token_id = jwt_payload['jti'] # JWT ID unico
+        return token_id in blacklisted_tokens
 
 @admin_log.route('/login', methods=['POST'])
 def admin_login():
@@ -30,6 +43,16 @@ def admin_login():
     else:
         return jsonify({"error": "Usuario o contraseña incorrecta"}), 401
     
+@admin_log.route('/logout', methods=['POST'])
+@jwt_required()
+def logout():
+    token = get_jwt()
+    token_id = token["jti"]
+
+    # Agregar el token a la blacklist
+    blacklisted_tokens.add(token_id)
+
+    return jsonify({'message' : "Sesion cerrada correctamente"}), 200
 
 @admin_log.route('/refresh', methods=['POST'])
 @jwt_required(refresh=True)
