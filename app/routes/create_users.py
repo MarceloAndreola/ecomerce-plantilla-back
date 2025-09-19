@@ -1,15 +1,13 @@
-# create_users.py (modificado)
 from flask import Blueprint, request, jsonify
 from app.models import db
-from app.models.auth_admin import Admin  # Ahora usamos Admin
-from werkzeug.security import generate_password_hash
+from app.models.auth_admin import Admin
 
 create_users = Blueprint('users', __name__, url_prefix='/user')
 
 # CREAR USUARIOS ADMIN
 @create_users.route('/create-users', methods=['POST'])
 def create_user():
-    data = request.get_json()
+    data = request.get_json(force=True)  # 🔹 force=True asegura que Flask interprete JSON
     if not data or "name" not in data or "password" not in data:
         return jsonify({'error': 'Faltan datos'}), 400
 
@@ -29,7 +27,8 @@ def create_user():
 
     return jsonify({
         'id': new_user.id,
-        'name': new_user.name_admin
+        'name': new_user.name_admin,
+        'message': f"Usuario {new_user.name_admin} creado correctamente"  # 🔹 mensaje de confirmación
     }), 201
 
 
@@ -41,6 +40,3 @@ def lista_user():
         'id': user.id,
         'name': user.name_admin
     } for user in usuarios])
-
-
-
