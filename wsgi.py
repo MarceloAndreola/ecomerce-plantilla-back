@@ -8,6 +8,7 @@ from app.routes.create_auth_admin import admin_log
 from app.routes.bank_details import bank_details
 from app.routes.chekout_payments import pagos_bp
 from app.models.auth_admin import Admin
+from app.routes.payment import payment_bp
 import os
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, get_jwt_identity, get_jwt
@@ -95,6 +96,7 @@ app.register_blueprint(create_prod)
 app.register_blueprint(admin_log)
 app.register_blueprint(bank_details)
 app.register_blueprint(pagos_bp)
+app.register_blueprint(payment_bp)
 
 # ================= Crear admin si no existe =================
 with app.app_context():
