@@ -33,7 +33,7 @@ app.config['JWT_HEADER_TYPE'] = 'Bearer'
 
 jwt = JWTManager(app)
 
-# Claims personalizados
+# ================= Claims personalizados ===================
 @jwt.additional_claims_loader
 def add_claims_to_access_token(identity):
     #Aqui podras consultar a la base de datos para obtener roles
@@ -53,7 +53,7 @@ def is_admin():
 
 
 
-# Manejador para token expirados
+# ================= Manejador para token expirados =================
 @jwt.expired_token_loader
 def expired_token_callback(jwt_header, jwt_payload):
     return jsonify({
@@ -69,7 +69,7 @@ def invalid_token_callback(error):
         'message' : 'La firma del token no es valida'
     }), 401
 
-# Manejador para peticiones sin token
+# =================== Manejador para peticiones sin token ==================
 @jwt.unauthorized_loader
 def missing_token_callback(error):
     return jsonify({
