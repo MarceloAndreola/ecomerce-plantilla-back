@@ -17,6 +17,7 @@ from config import Config
 
 
 
+
 # ================ Crear app ====================
 app = Flask(__name__)
 CORS(app)
