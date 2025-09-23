@@ -17,10 +17,7 @@ from config import Config
 
 # ================ Crear app ====================
 app = Flask(__name__)
-from flask_cors import CORS
-
-CORS(app, resources={r"/payment/*": {"origins": "https://e-commerce-plantilla-frontend.netlify.app"}})
-
+CORS(app, resources={r"/*": {"origins": "https://e-commerce-plantilla-frontend.netlify.app"}})
 # ================ Cargar configuracion ================
 app.config.from_object(Config)
 
