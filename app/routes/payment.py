@@ -3,6 +3,7 @@ import mercadopago
 from flask import Blueprint, request, jsonify
 
 payment_bp = Blueprint("payment", __name__, url_prefix='/payment')
+print("MP_ACCESS_TOKEN:", os.getenv("MP_ACCESS_TOKEN"))
 sdk = mercadopago.SDK(os.getenv("MP_ACCESS_TOKEN"))
 
 @payment_bp.route('/create_preference', methods=['POST', 'OPTIONS'])
