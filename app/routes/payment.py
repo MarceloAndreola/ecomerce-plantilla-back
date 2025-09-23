@@ -6,16 +6,8 @@ payment_bp = Blueprint("payment", __name__)
 
 sdk = mercadopago.SDK(os.getenv("MP_ACCESS_TOKEN"))
 
-@payment_bp.route('/create_preference', methods=['POST', 'OPTIONS'])
+@payment_bp.route('/create_preference', methods=['POST'])
 def create_preference():
-    if request.method == 'OPTIONS':
-        # Respuesta para preflight
-        response = make_response()
-        response.headers.add("Access-Control-Allow-Origin", "*")
-        response.headers.add("Access-Control-Allow-Headers", "*")
-        response.headers.add("Access-Control-Allow-Methods", "POST, OPTIONS")
-        return response
-
     data = request.json
     preference_data = {
         "items": [
