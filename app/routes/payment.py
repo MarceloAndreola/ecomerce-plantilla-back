@@ -13,13 +13,14 @@ def create_preference():
     try:
         data = request.json
         print("Data recibida:", data)
+
         preference_data = {
             "items": [
                 {
-                    'title': data['title'],
-                    'quantity': int(data['quantity']),
-                    'unit_price': float(data['unit_price']),
-                }
+                    'title': item['title'],
+                    'quantity': int(item['quantity']),
+                    'unit_price': float(item['unit_price']),
+                } for item in data['items']
             ],
             'back_urls': {
                 'success': 'https://e-commerce-plantilla-frontend.netlify.app/success',
