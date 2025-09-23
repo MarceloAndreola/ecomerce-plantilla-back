@@ -11,6 +11,7 @@ def create_preference():
         return jsonify({'message': 'Preflight OK'}), 200
     try:
         data = request.json
+        print("Data recibida:", data)
         preference_data = {
             "items": [
                 {
@@ -29,12 +30,8 @@ def create_preference():
                 'installments': 12
             }
         }
-
         preference_response = sdk.preference().create(preference_data)
         return jsonify(preference_response['response'])
-
     except Exception as e:
-        import traceback
-        print("🔥 Error en create_preference:", e)
-        traceback.print_exc()
+        print("Error en create_preference:", e)
         return jsonify({'error': str(e)}), 500
