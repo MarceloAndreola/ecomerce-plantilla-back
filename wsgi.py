@@ -15,9 +15,6 @@ from flask_jwt_extended import JWTManager, get_jwt_identity, get_jwt
 from datetime import timedelta
 from config import Config
 
-
-
-
 # ================ Crear app ====================
 app = Flask(__name__)
 CORS(app)
