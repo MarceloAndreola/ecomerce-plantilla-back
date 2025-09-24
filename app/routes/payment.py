@@ -22,6 +22,9 @@ def create_preference():
                     'unit_price': float(item['unit_price']),
                 } for item in data['items']
             ],
+            "payer": {
+                "email": "tester_user_123456@testuser.com"
+            },
             'back_urls': {
                 'success': 'https://e-commerce-plantilla-frontend.netlify.app/success',
                 'failure': 'https://e-commerce-plantilla-frontend.netlify.app/failure',
