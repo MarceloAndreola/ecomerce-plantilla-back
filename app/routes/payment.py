@@ -33,7 +33,13 @@ def create_preference():
             }
         }
         preference_response = sdk.preference().create(preference_data)
-        return jsonify(preference_response['response'])
+        preference = preference_response['response']
+        checkout_url = preference.get('sandbox_init_point', preference.get('init_point'))
+
+        return jsonify({
+            'preference_id' : preference['id'],
+            'sandbox_url' : checkout_url
+        })
     except Exception as e:
         print("Error en create_preference:", e)
         return jsonify({'error': str(e)}), 500
