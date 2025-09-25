@@ -254,9 +254,9 @@ def mod_prod(id):
     # Actualizamos campos obligatorios
     producto.name_prod = data.get('name_prod', producto.name_prod)
     producto.descripcion = data.get('descripcion', producto.descripcion)
-    producto.precio = data.get('precio', producto.precio)
-    producto.stock = data.get('stock', producto.stock)
-    producto.categoria_id = data.get('categoria_id', producto.categoria_id)
+    producto.precio = float(data.get('precio', producto.precio))
+    producto.stock = int(data.get('stock', producto.stock))
+    producto.categoria_id = int(data.get('categoria_id', producto.categoria_id))
 
     # Solo actualizamos la imagen si se subió una nueva
     if file and allowed_file(file.filename):
