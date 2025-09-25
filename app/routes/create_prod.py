@@ -216,12 +216,8 @@ def test():
     return "ok"
 
 @create_prod.route('/buscar_prod/<string:name>', methods=['GET'])
-@jwt_required()
+@jwt_required(optional=True)
 def buscar_prod(name):
-    from wsgi import is_admin
-    if not is_admin():
-        return jsonify({'msg' : 'No autorizado'}), 403
-
     name = name.strip()  # quita espacios
     productos = Productos.query.filter(Productos.name_prod.ilike(f"%{name}%")).all()
     
