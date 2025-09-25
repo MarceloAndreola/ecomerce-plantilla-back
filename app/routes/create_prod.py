@@ -104,11 +104,8 @@ def lista_user():
 
 
 @create_prod.route('/lista_categorias', methods=["GET"])
-@jwt_required()
+@jwt_required(optional=True)
 def get_categorias():
-    from wsgi import is_admin
-    if not is_admin():
-        return jsonify({'msg' : 'No autorizado'}), 403
     categorias = Categoria.query.all()
     return jsonify([{"id": c.id, "name_cat": c.name_cat} for c in categorias])
 
