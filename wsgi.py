@@ -46,9 +46,15 @@ def add_claims_to_access_token(identity):
     }
 
 def is_admin():
-    claims = get_jwt()
-    return claims.get('role') == 'admin'
-
+    identity = get_jwt_identity()
+    if not identity:
+        return False
+    
+    user = User.query.get(identity)
+    if not user:
+        return False
+    
+    return getattr(user, 'role', '') == 'admin'
 
 
 # ================= Manejador para token expirados =================

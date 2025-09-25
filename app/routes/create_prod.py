@@ -104,12 +104,17 @@ def lista_user():
 
 
 @create_prod.route('/lista_categorias', methods=["GET"])
+@jwt_required()
 def get_categorias():
+    from wsgi import is_admin
+    if not is_admin():
+        return jsonify({'msg' : 'No autorizado'}), 403
     categorias = Categoria.query.all()
     return jsonify([{"id": c.id, "name_cat": c.name_cat} for c in categorias])
 
 
 @create_prod.route('/lista_prod_por_cat/<int:categoria_id>', methods=["GET"])
+@jwt_required(optional=True)
 def get_prod_por_categoria(categoria_id):
     # Trae todos los productos de la categoría
     productos = Productos.query.filter_by(categoria_id=categoria_id).all()
@@ -132,7 +137,11 @@ def get_prod_por_categoria(categoria_id):
     ]), 200
 
 @create_prod.route('/create_categoria', methods=["POST"])
+@jwt_required()
 def create_categoria():
+    from wsgi import is_admin
+    if not is_admin():
+        return jsonify({'msg' : 'No autorizado'}), 403
     data = request.get_json()
     name_cat = data.get("name_cat")
 
@@ -171,7 +180,11 @@ def buscar_cat(name):
 
 
 @create_prod.route('/modificar_cat/<int:id>', methods=['PUT'])
+@jwt_required()
 def modificar_cat(id):
+    from wsgi import is_admin
+    if not is_admin():
+        return jsonify({'msg' : 'No autorizado'}), 403
     categoria = Categoria.query.get_or_404(id)
 
     data = request.form
@@ -186,7 +199,11 @@ def modificar_cat(id):
     }), 200
 
 @create_prod.route('/delete_cat/<int:id>', methods=['DELETE'])
+@jwt_required()
 def delete_cat(id):
+    from wsgi import is_admin
+    if not is_admin():
+        return jsonify({'msg' : 'No autorizado'}), 403
     categoria = Categoria.query.get_or_404(id)
     db.session.delete(categoria)
     db.session.commit()
@@ -202,7 +219,12 @@ def test():
     return "ok"
 
 @create_prod.route('/buscar_prod/<string:name>', methods=['GET'])
+@jwt_required()
 def buscar_prod(name):
+    from wsgi import is_admin
+    if not is_admin():
+        return jsonify({'msg' : 'No autorizado'}), 403
+
     name = name.strip()  # quita espacios
     productos = Productos.query.filter(Productos.name_prod.ilike(f"%{name}%")).all()
     
@@ -225,7 +247,12 @@ def buscar_prod(name):
 
 
 @create_prod.route('/modificar_prod/<int:id>', methods=['PUT'])
+@jwt_required()
 def mod_prod(id):
+    from wsgi import is_admin
+    if not is_admin():
+        return jsonify({'msg' : 'No autorizado'}), 403
+
     producto = Productos.query.get_or_404(id)
     
     data = request.form  # vamos a usar form para archivos opcionales
@@ -256,7 +283,12 @@ def mod_prod(id):
     }), 200
 
 @create_prod.route('/delete_productos/<int:id>', methods=['DELETE'])
+@jwt_required()
 def delete_prod(id):
+    from wsgi import is_admin
+    if not is_admin():
+        return jsonify({'msg' : 'No autorizado'}), 403
+
     producto = Productos.query.get_or_404(id)
     db.session.delete(producto)
     db.session.commit()
