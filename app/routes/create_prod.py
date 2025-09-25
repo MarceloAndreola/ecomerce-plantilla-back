@@ -244,21 +244,31 @@ def buscar_prod(name):
 def mod_prod(id):
     from wsgi import is_admin
     if not is_admin():
-        return jsonify({'msg' : 'No autorizado'}), 403
+        return jsonify({'msg': 'No autorizado'}), 403
 
     producto = Productos.query.get_or_404(id)
-    
-    data = request.form  # vamos a usar form para archivos opcionales
-    file = request.files.get('image')  # puede ser None
 
-    # Actualizamos campos obligatorios
-    producto.name_prod = data.get('name_prod', producto.name_prod)
-    producto.descripcion = data.get('descripcion', producto.descripcion)
-    producto.precio = float(data.get('precio', producto.precio))
-    producto.stock = int(data.get('stock', producto.stock))
-    producto.categoria_id = int(data.get('categoria_id', producto.categoria_id))
+    # ✅ Detectamos si viene JSON o multipart
+    if request.content_type.startswith('application/json'):
+        data = request.get_json()
+        file = None
+    else:
+        data = request.form
+        file = request.files.get('image')
 
-    # Solo actualizamos la imagen si se subió una nueva
+    # ✅ Actualizamos datos
+    if 'name_prod' in data:
+        producto.name_prod = data['name_prod']
+    if 'descripcion' in data:
+        producto.descripcion = data['descripcion']
+    if 'precio' in data:
+        producto.precio = float(data['precio'])
+    if 'stock' in data:
+        producto.stock = int(data['stock'])
+    if 'categoria_id' in data:
+        producto.categoria_id = int(data['categoria_id'])
+
+    # ✅ Subimos a Cloudinary solo si hay archivo nuevo
     if file and allowed_file(file.filename):
         resultado = cloudinary.uploader.upload(file)
         producto.image_path = resultado['secure_url']
