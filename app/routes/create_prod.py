@@ -138,15 +138,14 @@ def get_prod_por_categoria(categoria_id):
 def create_categoria():
     from wsgi import is_admin
     if not is_admin():
-        return jsonify({'msg': 'No autorizado'}), 403
+        return jsonify({'msg' : 'No autorizado'}), 403
 
     data = request.get_json()
     name_cat = data.get("name_cat")
 
     if not name_cat:
         return jsonify({"error": "Falta el nombre de la categoría"}), 400
-    
-    # Validar que no exista duplicada
+
     if Categoria.query.filter_by(name_cat=name_cat).first():
         return jsonify({"error": "La categoría ya existe"}), 400
 
@@ -158,7 +157,6 @@ def create_categoria():
         "id": nueva_cat.id,
         "name_cat": nueva_cat.name_cat
     }), 201
-
 
 @create_prod.route('/buscar_cat/<string:name>', methods=['GET'])
 def buscar_cat(name):
