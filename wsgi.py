@@ -2,7 +2,8 @@ from flask import Flask, send_from_directory, jsonify
 from app.models import db
 from app.models.user import User
 from app.models.auth_admin import Admin
-from app.routes import main, create_users, create_prod, admin_log, bank_details, payment_bp, pagos_bp
+from app.routes import main, create_users, create_prod, bank_details, payment_bp, pagos_bp
+from app.routes.create_auth_admin import admin_log
 import os
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, get_jwt_identity
@@ -41,8 +42,6 @@ def is_admin():
     identity = get_jwt_identity()
     if not identity:
         return False
-
-    # Buscamos el admin por su nombre
     admin = Admin.query.filter_by(name_admin=identity).first()
     return admin is not None
 
