@@ -138,7 +138,8 @@ def get_prod_por_categoria(categoria_id):
 def create_categoria():
     from wsgi import is_admin
     if not is_admin():
-        return jsonify({'msg' : 'No autorizado'}), 403
+        return jsonify({'msg': 'No autorizado'}), 403
+
     data = request.get_json()
     name_cat = data.get("name_cat")
 

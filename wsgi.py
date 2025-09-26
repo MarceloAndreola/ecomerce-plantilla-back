@@ -46,16 +46,21 @@ def add_claims_to_access_token(identity):
     }
 
 def is_admin():
+    """
+    ⚡ Corrige error: get_jwt_identity() puede devolver 'admin' (string) o un id.
+    Ahora buscamos al admin correctamente.
+    """
     identity = get_jwt_identity()
     if not identity:
         return False
-    
-    user = User.query.get(identity)
+
+    # Buscamos por nombre de admin en lugar de id
+    user = User.query.filter_by(name=identity).first()
     if not user:
         return False
     
+    # Retornamos True solo si tiene rol admin
     return getattr(user, 'role', '') == 'admin'
-
 
 # ================= Manejador para token expirados =================
 @jwt.expired_token_loader
