@@ -1,23 +1,18 @@
 from flask import Flask, send_from_directory, jsonify
 from app.models import db
 from app.models.user import User
-from app.routes import main
-from app.routes.create_users import create_users
-from app.routes.create_prod import create_prod
-from app.routes.create_auth_admin import admin_log
-from app.routes.bank_details import bank_details
-from app.routes.chekout_payments import pagos_bp
 from app.models.auth_admin import Admin
-from app.routes.payment import payment_bp
+from app.routes import main, create_users, create_prod, admin_log, bank_details, payment_bp, pagos_bp
 import os
 from flask_cors import CORS
-from flask_jwt_extended import JWTManager, get_jwt_identity, get_jwt
+from flask_jwt_extended import JWTManager, get_jwt_identity
 from datetime import timedelta
 from config import Config
 
 # ================ Crear app ====================
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "https://e-commerce-plantilla-frontend.netlify.app"}})
+
 # ================ Cargar configuracion ================
 app.config.from_object(Config)
 
@@ -34,57 +29,35 @@ jwt = JWTManager(app)
 # ================= Claims personalizados ===================
 @jwt.additional_claims_loader
 def add_claims_to_access_token(identity):
-    #Aqui podras consultar a la base de datos para obtener roles
     if identity == 'admin':
-        return {
-            'role' : 'admin',
-            'permissions' : ['read', 'write', 'delete']
-        }
-    return {
-        'role' : 'user',
-        'permissions' : ['read']
-    }
+        return {'role': 'admin', 'permissions': ['read', 'write', 'delete']}
+    return {'role': 'user', 'permissions': ['read']}
 
+# ================= Verificar admin ===================
 def is_admin():
     """
-    ⚡ Corrige error: get_jwt_identity() puede devolver 'admin' (string) o un id.
-    Ahora buscamos al admin correctamente.
+    Retorna True si el JWT corresponde a un admin existente en la tabla Admin.
     """
     identity = get_jwt_identity()
     if not identity:
         return False
 
-    # Buscamos por nombre de admin en lugar de id
-    user = User.query.filter_by(name=identity).first()
-    if not user:
-        return False
-    
-    # Retornamos True solo si tiene rol admin
-    return getattr(user, 'role', '') == 'admin'
+    # Buscamos el admin por su nombre
+    admin = Admin.query.filter_by(name_admin=identity).first()
+    return admin is not None
 
-# ================= Manejador para token expirados =================
+# ================= Manejadores de JWT ===================
 @jwt.expired_token_loader
 def expired_token_callback(jwt_header, jwt_payload):
-    return jsonify({
-        'error' : 'Token expirado',
-        'message' : 'El token de acceso ha caducado'
-    }), 401
+    return jsonify({'error': 'Token expirado', 'message': 'El token de acceso ha caducado'}), 401
 
-# Manejador para tokens invalidos
 @jwt.invalid_token_loader
 def invalid_token_callback(error):
-    return jsonify({
-        'error' : 'Token invalido',
-        'message' : 'La firma del token no es valida'
-    }), 401
+    return jsonify({'error': 'Token invalido', 'message': 'La firma del token no es valida'}), 401
 
-# =================== Manejador para peticiones sin token ==================
 @jwt.unauthorized_loader
 def missing_token_callback(error):
-    return jsonify({
-        'error' : 'Token requerido',
-        'message' : 'Se requiere un token de acceso valido'
-    }), 401
+    return jsonify({'error': 'Token requerido', 'message': 'Se requiere un token de acceso valido'}), 401
 
 # ================= Carpeta para subir comprobantes =================
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -116,11 +89,6 @@ with app.app_context():
         print("✅ Admin creado: usuario=admin, password=1234")
     else:
         print("⚠️ Admin ya existe")
-
-# ================= Servir archivos subidos =================
-#@app.route('/uploads/<filename>')
-#def uploaded_file(filename):
-#    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 # ================= Ejecutar app =================
 if __name__ == '__main__':
